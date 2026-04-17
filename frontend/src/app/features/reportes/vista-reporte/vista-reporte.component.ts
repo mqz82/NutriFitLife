@@ -6,7 +6,7 @@ import {
   ArcElement, Tooltip, Legend, DoughnutController,
   BarElement, BarController, CategoryScale, LinearScale,
   LineElement, LineController, PointElement,
-  ScatterController
+  ScatterController, Filler
 } from 'chart.js';
 import { ResultadoAntropometrico }   from '../../../shared/models/resultado-antropometrico.model';
 import { MedicionService }           from '../../../core/services/medicion.service';
@@ -16,7 +16,7 @@ Chart.register(
   ArcElement, Tooltip, Legend, DoughnutController,
   BarElement, BarController, CategoryScale, LinearScale,
   LineElement, LineController, PointElement,
-  ScatterController
+  ScatterController, Filler
 );
 
 /**
