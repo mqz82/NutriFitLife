@@ -220,9 +220,10 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
       next: r => {
         this.resultado = r;
         this.cargando  = false;
-        // Forzar renderizado del template (*ngIf) y luego crear gráficos
+        // 1. Forzar que Angular renderice el *ngIf con los <canvas>
         this.cdr.detectChanges();
-        this.crearGraficos();
+        // 2. Diferir al siguiente tick para que el DOM esté completamente listo
+        setTimeout(() => this.crearGraficos(), 0);
       },
       error: () => {
         this.error    = 'Error al calcular el resultado. Verifica que el backend esté corriendo.';
