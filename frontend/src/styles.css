@@ -1,0 +1,89 @@
+/* ============================================================
+   NutriFitLife — Estilos globales
+   ============================================================ */
+
+:root {
+  --color-primario:   #007bff;
+  --color-secundario: #28a745;
+  --color-grasa:      #ff8800;
+  --color-magra:      #007bff;
+  --color-fondo:      #f8f9fa;
+}
+
+body {
+  background-color: var(--color-fondo);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Navbar */
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+/* Tarjetas de métricas */
+.card-metrica {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  transition: box-shadow .2s;
+}
+
+.card-metrica:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,.14);
+}
+
+.card-metrica .valor {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* Tablas */
+.table thead th {
+  background-color: var(--color-primario);
+  color: white;
+  font-weight: 600;
+  border: none;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(0,123,255,.05);
+}
+
+/* Secciones de informe */
+.seccion-titulo {
+  color: var(--color-primario);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border-bottom: 2px solid var(--color-primario);
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+
+/* Botón descargar PDF */
+.btn-pdf {
+  background-color: #dc3545;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-pdf:hover {
+  background-color: #b02a37;
+  color: white;
+}
+
+/* Spinner de carga */
+.spinner-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Formularios de medición — tabs */
+.nav-tabs .nav-link.active {
+  border-bottom: 3px solid var(--color-primario);
+  font-weight: 600;
+}
