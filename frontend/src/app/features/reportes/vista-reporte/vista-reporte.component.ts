@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { CommonModule }              from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
@@ -236,7 +236,8 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
   constructor(
     private route:           ActivatedRoute,
     private medicionService: MedicionService,
-    private cdr:             ChangeDetectorRef
+    private cdr:             ChangeDetectorRef,
+    private ngZone:          NgZone
   ) {}
 
   ngOnInit(): void {
@@ -247,8 +248,11 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
       next: r => {
         this.resultado = r;
         this.cargando  = false;
-        this.cdr.detectChanges();          // fuerza render del *ngIf con los <canvas>
-        setTimeout(() => this.crearGraficos(), 0); // espera al siguiente tick del event loop
+        this.cdr.detectChanges();  // fuerza render del *ngIf con los <canvas>
+        // Zone.js parchea requestAnimationFrame: cada frame de Chart.js dispararía
+        // change detection de Angular (360 veces/seg con 6 gráficos), congelando el browser.
+        // runOutsideAngular() corre Chart.js fuera de la zona → sin interferencia.
+        setTimeout(() => this.ngZone.runOutsideAngular(() => this.crearGraficos()), 0);
       },
       error: () => {
         this.error    = 'Error al calcular el resultado. Verifica que el backend esté corriendo.';
