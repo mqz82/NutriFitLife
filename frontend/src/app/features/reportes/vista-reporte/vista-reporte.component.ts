@@ -21,13 +21,19 @@ Chart.register(
 /**
  * Vista del informe antropométrico con gráficos interactivos (Chart.js).
  * Ruta: /reportes/:medicionId
+ *
+ * IMPORTANTE — contenedores de canvas:
+ *   Cada <canvas> está dentro de un <div style="position:relative;height:Xpx">.
+ *   Junto con maintainAspectRatio:false en las opciones, esto evita el loop
+ *   infinito de ResizeObserver que ocurre cuando Chart.js responsive=true
+ *   interactúa con contenedores flex/Bootstrap sin altura explícita.
  */
 @Component({
   selector: 'app-vista-reporte',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div *ngIf="cargando" class="spinner-overlay">
+    <div *ngIf="cargando" class="d-flex justify-content-center align-items-center" style="height:60vh;">
       <div class="spinner-border text-primary" role="status"></div>
     </div>
 
@@ -54,7 +60,7 @@ Chart.register(
             <a [routerLink]="['/pacientes', resultado.pacienteId]" class="btn btn-light btn-sm">
               <i class="bi bi-arrow-left me-1"></i>Volver
             </a>
-            <a [href]="urlPDF" target="_blank" class="btn btn-pdf btn-sm">
+            <a [href]="urlPDF" target="_blank" class="btn btn-warning btn-sm fw-bold">
               <i class="bi bi-file-pdf me-1"></i>Descargar PDF
             </a>
           </div>
@@ -64,34 +70,34 @@ Chart.register(
       <!-- Métricas principales -->
       <div class="row g-3 mb-4">
         <div class="col-md-3 col-6">
-          <div class="card card-metrica text-center p-3">
+          <div class="card text-center p-3 h-100">
             <div class="text-muted small">Peso</div>
-            <div class="valor text-primary">{{ resultado.peso }} kg</div>
+            <div class="fw-bold fs-4 text-primary">{{ resultado.peso }} kg</div>
           </div>
         </div>
         <div class="col-md-3 col-6">
-          <div class="card card-metrica text-center p-3">
+          <div class="card text-center p-3 h-100">
             <div class="text-muted small">Talla</div>
-            <div class="valor text-primary">{{ resultado.talla }} cm</div>
+            <div class="fw-bold fs-4 text-primary">{{ resultado.talla }} cm</div>
           </div>
         </div>
         <div class="col-md-3 col-6">
-          <div class="card card-metrica text-center p-3">
+          <div class="card text-center p-3 h-100">
             <div class="text-muted small">IMC</div>
-            <div class="valor"
+            <div class="fw-bold fs-4"
                  [class.text-success]="resultado.clasificacionIMC === 'Normal'"
                  [class.text-warning]="resultado.clasificacionIMC === 'Sobrepeso'"
                  [class.text-danger]="resultado.clasificacionIMC === 'Obesidad'">
               {{ resultado.imc | number:'1.1-1' }}
             </div>
-            <div class="badge bg-{{ badgeIMC }}">{{ resultado.clasificacionIMC }}</div>
+            <div class="badge bg-{{ badgeIMC }} mt-1">{{ resultado.clasificacionIMC }}</div>
           </div>
         </div>
         <div class="col-md-3 col-6">
-          <div class="card card-metrica text-center p-3">
+          <div class="card text-center p-3 h-100">
             <div class="text-muted small">Ratio C-C</div>
-            <div class="valor text-primary">{{ resultado.ratioCinturaCadera | number:'1.2-2' }}</div>
-            <div class="badge bg-{{ badgeRCC }}">{{ resultado.clasificacionRCC }}</div>
+            <div class="fw-bold fs-4 text-primary">{{ resultado.ratioCinturaCadera | number:'1.2-2' }}</div>
+            <div class="badge bg-{{ badgeRCC }} mt-1">{{ resultado.clasificacionRCC }}</div>
           </div>
         </div>
       </div>
@@ -100,15 +106,18 @@ Chart.register(
       <div class="row g-3 mb-4">
         <div class="col-md-5">
           <div class="card shadow-sm h-100">
-            <div class="card-header"><span class="seccion-titulo">FRACCIONAMIENTO 2 MASAS</span></div>
-            <div class="card-body d-flex align-items-center justify-content-center">
-              <canvas #chartDonut style="max-height:220px;"></canvas>
+            <div class="card-header fw-bold text-primary">FRACCIONAMIENTO 2 MASAS</div>
+            <div class="card-body">
+              <!-- contenedor con altura fija: evita loop ResizeObserver de Chart.js -->
+              <div style="position:relative;height:220px;">
+                <canvas #chartDonut></canvas>
+              </div>
             </div>
           </div>
         </div>
         <div class="col-md-7">
           <div class="card shadow-sm h-100">
-            <div class="card-header"><span class="seccion-titulo">SOMATOTIPO HEATH-CARTER</span></div>
+            <div class="card-header fw-bold text-primary">SOMATOTIPO HEATH-CARTER</div>
             <div class="card-body">
               <div class="row g-3 mb-3">
                 <div class="col-4 text-center">
@@ -124,10 +133,12 @@ Chart.register(
                   <small class="text-muted">Ectomorfia</small>
                 </div>
               </div>
-              <div class="text-center mb-3">
+              <div class="text-center mb-2">
                 <span class="badge bg-secondary fs-6">{{ resultado.clasificacionSomatotipo }}</span>
               </div>
-              <canvas #chartSoma style="max-height:180px;"></canvas>
+              <div style="position:relative;height:170px;">
+                <canvas #chartSoma></canvas>
+              </div>
             </div>
           </div>
         </div>
@@ -137,14 +148,22 @@ Chart.register(
       <div class="row g-3 mb-4">
         <div class="col-md-6">
           <div class="card shadow-sm">
-            <div class="card-header"><span class="seccion-titulo">COMPOSICIÓN CORPORAL (%)</span></div>
-            <div class="card-body"><canvas #chartBarraPct style="max-height:200px;"></canvas></div>
+            <div class="card-header fw-bold text-primary">COMPOSICIÓN CORPORAL (%)</div>
+            <div class="card-body">
+              <div style="position:relative;height:200px;">
+                <canvas #chartBarraPct></canvas>
+              </div>
+            </div>
           </div>
         </div>
         <div class="col-md-6">
           <div class="card shadow-sm">
-            <div class="card-header"><span class="seccion-titulo">COMPOSICIÓN CORPORAL (kg)</span></div>
-            <div class="card-body"><canvas #chartBarraKg style="max-height:200px;"></canvas></div>
+            <div class="card-header fw-bold text-primary">COMPOSICIÓN CORPORAL (kg)</div>
+            <div class="card-body">
+              <div style="position:relative;height:200px;">
+                <canvas #chartBarraKg></canvas>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -153,26 +172,34 @@ Chart.register(
       <div class="row g-3 mb-4">
         <div class="col-md-7">
           <div class="card shadow-sm">
-            <div class="card-header">
-              <span class="seccion-titulo">PERFIL DE PLIEGUES (mm)</span>
-              <span class="ms-3 text-muted small">
+            <div class="card-header fw-bold text-primary">
+              PERFIL DE PLIEGUES (mm)
+              <span class="ms-3 text-muted fw-normal small">
                 Σ6={{ resultado.suma6Pliegues }} mm &nbsp; Σ8={{ resultado.suma8Pliegues }} mm
               </span>
             </div>
-            <div class="card-body"><canvas #chartPliegues style="max-height:200px;"></canvas></div>
+            <div class="card-body">
+              <div style="position:relative;height:200px;">
+                <canvas #chartPliegues></canvas>
+              </div>
+            </div>
           </div>
         </div>
         <div class="col-md-5">
           <div class="card shadow-sm">
-            <div class="card-header"><span class="seccion-titulo">PERÍMETROS (cm)</span></div>
-            <div class="card-body"><canvas #chartPerimetros style="max-height:200px;"></canvas></div>
+            <div class="card-header fw-bold text-primary">PERÍMETROS (cm)</div>
+            <div class="card-body">
+              <div style="position:relative;height:200px;">
+                <canvas #chartPerimetros></canvas>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Tabla resumen -->
       <div class="card shadow-sm mb-4">
-        <div class="card-header"><span class="seccion-titulo">TABLA DE MEDICIONES</span></div>
+        <div class="card-header fw-bold text-primary">TABLA DE MEDICIONES</div>
         <div class="card-body">
           <div class="row g-2">
             <ng-container *ngFor="let item of tablaMediciones">
@@ -220,10 +247,8 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
       next: r => {
         this.resultado = r;
         this.cargando  = false;
-        // 1. Forzar que Angular renderice el *ngIf con los <canvas>
-        this.cdr.detectChanges();
-        // 2. Diferir al siguiente tick para que el DOM esté completamente listo
-        setTimeout(() => this.crearGraficos(), 0);
+        this.cdr.detectChanges();          // fuerza render del *ngIf con los <canvas>
+        setTimeout(() => this.crearGraficos(), 0); // espera al siguiente tick del event loop
       },
       error: () => {
         this.error    = 'Error al calcular el resultado. Verifica que el backend esté corriendo.';
@@ -236,7 +261,7 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
     this.charts.forEach(c => c.destroy());
   }
 
-  // ── Gráficos ───────────────────────────────────────────────────────
+  // ── Gráficos ───────────────────────────────────────────────────────────────
 
   private crearGraficos(): void {
     const r = this.resultado!;
@@ -252,42 +277,55 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Opciones comunes: responsive + sin aspecto fijo (requiere contenedor con altura fija) */
+  private baseOpts() {
+    return { responsive: true, maintainAspectRatio: false };
+  }
+
   private crearDonut(r: ResultadoAntropometrico): void {
-    const pctGrasa = Math.max(0, r.porcentajeGrasa);
-    const pctMagra = Math.max(0, r.porcentajeMasaMagra);
+    const g = Math.max(0, r.porcentajeGrasa);
+    const m = Math.max(0, r.porcentajeMasaMagra);
     this.charts.push(new Chart(this.canvasDonut.nativeElement, {
       type: 'doughnut',
       data: {
-        labels: [`Masa Grasa ${pctGrasa}%`, `Masa Magra ${pctMagra}%`],
-        datasets: [{ data: [pctGrasa, pctMagra], backgroundColor: ['#ff8800', '#007bff'], borderWidth: 0 }]
+        labels: [`Grasa ${g.toFixed(1)}%`, `Magra ${m.toFixed(1)}%`],
+        datasets: [{ data: [g, m], backgroundColor: ['#ff8800', '#007bff'], borderWidth: 0 }]
       },
-      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      options: { ...this.baseOpts(), plugins: { legend: { position: 'bottom' } } }
     }));
   }
 
   private crearBarraPct(r: ResultadoAntropometrico): void {
-    const pctGrasa = Math.max(0, r.porcentajeGrasa);
-    const pctMagra = Math.max(0, r.porcentajeMasaMagra);
+    const g = Math.max(0, r.porcentajeGrasa);
+    const m = Math.max(0, r.porcentajeMasaMagra);
     this.charts.push(new Chart(this.canvasBarraPct.nativeElement, {
       type: 'bar',
       data: {
         labels: ['% Masa Grasa', '% Masa Magra'],
-        datasets: [{ data: [pctGrasa, pctMagra], backgroundColor: ['#ff8800', '#007bff'], borderRadius: 6 }]
+        datasets: [{ data: [g, m], backgroundColor: ['#ff8800', '#007bff'], borderRadius: 6 }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
+      options: {
+        ...this.baseOpts(),
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
     }));
   }
 
   private crearBarraKg(r: ResultadoAntropometrico): void {
-    const masaGrasa = Math.max(0, r.masaGrasaKg);
-    const masaMagra = Math.max(0, r.masaMagraKg);
+    const g = Math.max(0, r.masaGrasaKg);
+    const m = Math.max(0, r.masaMagraKg);
     this.charts.push(new Chart(this.canvasBarraKg.nativeElement, {
       type: 'bar',
       data: {
         labels: ['Masa Grasa (kg)', 'Masa Magra (kg)'],
-        datasets: [{ data: [masaGrasa, masaMagra], backgroundColor: ['#ff8800', '#007bff'], borderRadius: 6 }]
+        datasets: [{ data: [g, m], backgroundColor: ['#ff8800', '#007bff'], borderRadius: 6 }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      options: {
+        ...this.baseOpts(),
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
     }));
   }
 
@@ -304,9 +342,10 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
         }]
       },
       options: {
+        ...this.baseOpts(),
         scales: {
-          x: { min: -9, max: 9, title: { display: true, text: 'X (Ecto − Endo)' }, grid: { color: '#e9ecef' } },
-          y: { min: -9, max: 9, title: { display: true, text: 'Y (2×Meso − Endo − Ecto)' }, grid: { color: '#e9ecef' } }
+          x: { title: { display: true, text: 'X (Ecto − Endo)' }, grid: { color: '#e9ecef' } },
+          y: { title: { display: true, text: 'Y (2×Meso − Endo − Ecto)' }, grid: { color: '#e9ecef' } }
         },
         plugins: { legend: { display: false } }
       }
@@ -314,13 +353,15 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
   }
 
   private crearPerfilPliegues(r: ResultadoAntropometrico): void {
+    const labels = r.etiquetasPliegues || [];
+    const data   = r.perfilesDePliegues || [];
     this.charts.push(new Chart(this.canvasPliegues.nativeElement, {
       type: 'line',
       data: {
-        labels: r.etiquetasPliegues,
+        labels,
         datasets: [{
           label: 'Pliegues (mm)',
-          data: r.perfilesDePliegues,
+          data,
           borderColor: '#007bff',
           backgroundColor: 'rgba(0,123,255,.1)',
           fill: true,
@@ -328,22 +369,33 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
           pointRadius: 5
         }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      options: {
+        ...this.baseOpts(),
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
     }));
   }
 
   private crearPerimetros(r: ResultadoAntropometrico): void {
+    const labels = r.etiquetasPerimetros || [];
+    const data   = r.perimetrosCorregidos || [];
     this.charts.push(new Chart(this.canvasPerimetros.nativeElement, {
       type: 'bar',
       data: {
-        labels: r.etiquetasPerimetros,
-        datasets: [{ data: r.perimetrosCorregidos, backgroundColor: '#28a745', borderRadius: 4 }]
+        labels,
+        datasets: [{ data, backgroundColor: '#28a745', borderRadius: 4 }]
       },
-      options: { responsive: true, indexAxis: 'y' as const, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
+      options: {
+        ...this.baseOpts(),
+        indexAxis: 'y' as const,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true } }
+      }
     }));
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────
+  // ── Helpers ────────────────────────────────────────────────────────────────
 
   get badgeIMC(): string {
     switch (this.resultado?.clasificacionIMC) {
@@ -379,8 +431,8 @@ export class VistaReporteComponent implements OnInit, OnDestroy {
       { label: 'Ectomorfia',   valor: `${r.ectomorfia}` },
       { label: 'Σ 6 pliegues', valor: `${r.suma6Pliegues} mm` },
       { label: 'Σ 8 pliegues', valor: `${r.suma8Pliegues} mm` },
-      ...r.etiquetasPliegues.map((e, i) => ({ label: e, valor: `${r.perfilesDePliegues[i]} mm` })),
-      ...r.etiquetasPerimetros.map((e, i) => ({ label: e, valor: `${r.perimetrosCorregidos[i]} cm` }))
+      ...(r.etiquetasPliegues || []).map((e, i) => ({ label: e, valor: `${(r.perfilesDePliegues || [])[i] ?? 0} mm` })),
+      ...(r.etiquetasPerimetros || []).map((e, i) => ({ label: e, valor: `${(r.perimetrosCorregidos || [])[i] ?? 0} cm` }))
     ];
   }
 }
