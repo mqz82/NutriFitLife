@@ -430,11 +430,12 @@ public class AntropometriaCalculatorService {
             "Muslo", "Pantorrilla", "Bíceps", "Cresta ilíaca"
         });
 
-        // RCC
-        double rcc = calcularRatioCinturaCadera(
-                safe(m.getPerimetroCinturaMinima()), safe(m.getPerimetroCaderaMaximo()));
+        // RCC — solo si ambos perímetros tienen valor
+        double cintura = safe(m.getPerimetroCinturaMinima());
+        double cadera  = safe(m.getPerimetroCaderaMaximo());
+        double rcc = (cintura > 0 && cadera > 0) ? calcularRatioCinturaCadera(cintura, cadera) : 0.0;
         r.setRatioCinturaCadera(round2(rcc));
-        r.setClasificacionRCC(clasificarRCC(rcc, p.getSexo()));
+        r.setClasificacionRCC(rcc > 0 ? clasificarRCC(rcc, p.getSexo()) : "Sin datos");
 
         // Somatotipo
         double endo = calcularEndomorfia(
